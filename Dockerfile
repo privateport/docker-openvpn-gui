@@ -4,11 +4,11 @@ MAINTAINER SneakyScampi
 
 WORKDIR /root
 RUN apk update && apk upgrade \
-	&& apk add alpine-sdk autoconf automake libtool gettext bison flex ragel boost-dev | tee /tmp/install.txt \
-	&& git clone https://github.com/privateport/openvpn-webca.git \
-	&& cd /root/openvpn-webca \
-	&& npm cache clean && npm update -g npm && npm install --unsafe-perm \ 
-	&& apk del `grep 'Installing' /tmp/install.txt | awk {'print $3'} | xargs echo` && rm -rf /tmp/install.txt \
+	&& git clone https://github.com/privateport/openvpn-webca.git \ 
+		&& apk add alpine-sdk autoconf automake libtool gettext bison flex ragel boost-dev | tee /tmp/install.txt \
+		&& cd /root/openvpn-webca \
+		&& npm install --unsafe-perm \ 
+		&& apk del `grep 'Installing' /tmp/install.txt | awk {'print $3'} | xargs echo` && rm -rf /tmp/install.txt \
 
 COPY config.sh /opt/
 COPY start.sh /opt/
