@@ -4,14 +4,14 @@ function print_help {
 cat <<EOF
 Usage:
         -h | --help                     Print this help
-        -h | --pphostname )     Privateport.io HOSTNAME
+        -p | --pphostname )     Privateport.io HOSTNAME
         -e | --ppeasyname )     Privateport.io EASYNAME
 _______________________________________________
 by privateport.io
 EOF
 }
 
-OPTS=`getopt -o h:e: --long hostname:,easyname: -n 'parse-options' -- "$@"`
+OPTS=`getopt -o hp:e:x --long help,pphostname:,ppeasyname:,debug -n 'parse-options' -- "$@"`
 if [ $? != 0 ] ; then echo "Failed parsing options." >&2 ; exit 1 ; fi
 
 echo #OPTS
@@ -19,7 +19,7 @@ eval set -- "$OPTS"
 while true; do
   case "$1" in
         -h | --help )           print_help; exit 0; shift ;;
-        -h | --pphostname )     PPHOSTNAME="$2"; shift; shift ;;
+        -p | --pphostname )     PPHOSTNAME="$2"; shift; shift ;;
         -e | --ppeasyname )     PPEASYNAME="$2"; shift; shift ;;
         -x | --debug )          DEBUG=true; shift ;;
         -- ) shift; break ;;
@@ -29,6 +29,11 @@ done
 
 echo $PPHOSTNAME > /etc/pphostname
 echo $PPEASYNAME > /etc/ppeasyname
+
+if [ -z "$PPHOSTNAME" ] || [ -z "$PPEASYNAME" ]; then
+	print_help
+	exit 1	
+fi
 
 if [ -n "$DEBUG" ]; then
         /bin/bash

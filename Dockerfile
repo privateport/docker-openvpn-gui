@@ -15,4 +15,4 @@ COPY start.sh /opt/
 
 EXPOSE 3000/tcp
 ENTRYPOINT ["/opt/start.sh"]
-#CMD [""]
+CMD [""]

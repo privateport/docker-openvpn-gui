@@ -14,8 +14,8 @@ docker run sneakyscampi/docker-openvpn-sec (OPTIONS)
 	-n | --commonName		Common Name
 	-g | --getclientcert-ovpn	Get preexisiting Client Certificate with OVPN
 	-s | --start			Start OpenVPN
-	-C | --caconfigdir		Configuration Dir (default /etc/openssl)	
-	-D | --outputconfigdir		Output Config Dir (for non CA Keys)
+	-C | --caconfigpath		Configuration Dir (default /etc/openssl)	
+	-D | --outputconfigpath		Output Config Dir (for non CA Keys)
 _______________________________________________
 by SneakyScampi
 EOF
@@ -26,7 +26,7 @@ if [ $# -eq 0 ]; then
 fi
 
 
-OPTS=`getopt -o hid:con:xgsC:D: --long help,init,domainname:,client,createclientcert-ovpn,commonName:,debug,getclientcert-ovpn,start,caconfigdir:,outputconfigdir: -n 'parse-options' -- "$@"`
+OPTS=`getopt -o hid:con:xgsC:D: --long help,init,domainname:,client,createclientcert-ovpn,commonName:,debug,getclientcert-ovpn,start,caconfigpath:,outputconfigpath: -n 'parse-options' -- "$@"`
 if [ $? != 0 ] ; then echo "Failed parsing options." >&2 ; exit 1 ; fi
 
 echo #OPTS
@@ -42,8 +42,8 @@ while true; do
 	-x | --debug )		DEBUG=true; shift ;;
         -g | --getclientcert-ovpn ) GETOVPN=true; shift ;;
 	-s | --start )		START=true; shift ;;
-	-C | --caconfigdir)	CACONFIGDIR="$2"; shift; shift ;;
-	-D | --outputconfigdir)	OUTPUTCONFIGDIR="$2"; shift; shift ;;
+	-C | --caconfigpath)	CACONFIGPATH="$2"; shift; shift ;;
+	-D | --outputconfigpath) OUTPUTCONFIGPATH="$2"; shift; shift ;;
         -- ) shift; break ;;
         * ) break ;;
   esac
@@ -54,9 +54,9 @@ if [ -n "$DEBUG" ]; then
 	exit 0
 fi
 
-if [ -z "$CACONFIGDIR" ]; then
-	echo "CACONFIGDIR empty: $CACONFIGDIR"
-	CACONFIGDIR=/etc/openssl
+if [ -z "$CACONFIGPATH" ]; then
+	echo "CACONFIGPATH empty: $CACONFIGPATH"
+	CACONFIGPATH=/etc/openssl
 fi
 
 if [ -n "$INIT" ]; then
@@ -66,16 +66,16 @@ if [ -n "$INIT" ]; then
                 exit 1
         fi
 	echo "Creating Certificate Authority (CA)"
-	createCA -d $DOMAINNAME -c $CACONFIGDIR
+	createCA -d $DOMAINNAME -c $CACONFIGPATH
 	echo "Creating Server key and Signing"
-	createServerKeyAndSign -d $DOMAINNAME -c $CACONFIGDIR
-	openvpn --genkey --secret $CACONFIGDIR/server/ta.key
-	if [ -n "$OUTPUTCONFIGDIR" ]; then
-		if [ ! -d "$OUTPUTCONFIGDIR/server" ]; then
-			mkdir -p $OUTPUTCONFIGDIR/server
+	createServerKeyAndSign -d $DOMAINNAME -c $CACONFIGPATH
+	openvpn --genkey --secret $CACONFIGPATH/server/ta.key
+	if [ -n "$OUTPUTCONFIGPATH" ]; then
+		if [ ! -d "$OUTPUTCONFIGPATH/server" ]; then
+			mkdir -p $OUTPUTCONFIGPATH/server
 		fi
-		cp -pr $CACONFIGDIR/server/* $OUTPUTCONFIGDIR/server
-		cp $CACONFIGDIR/ca/ca.crt $OUTPUTCONFIGDIR/
+		cp -pr $CACONFIGPATH/server/* $OUTPUTCONFIGPATH/server
+		cp $CACONFIGPATH/ca/ca.crt $OUTPUTCONFIGPATH/
 	fi
 
 	#echo "Creating openvpn.conf"
@@ -89,9 +89,9 @@ if [ -n "$CREATECLIENT" ] || [ -n "$CREATEOVPN" ]; then
 		exit 1
 	fi
 	echo "Creating Client Config"
-	createClientCert -n $COMMONNAME -c $CACONFIGDIR
+	createClientCert -n $COMMONNAME -c $CACONFIGPATH
 	if [ -n "$CREATEOVPN" ]; then
-		buildOVPNClientConfig -n $COMMONNAME --configdir=$CACONFIGDIR
+		buildOVPNClientConfig -n $COMMONNAME --configpath=$CACONFIGPATH
 	fi	
         exit 0
 fi
