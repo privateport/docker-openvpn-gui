@@ -27,8 +27,8 @@ while true; do
   esac
 done
 
-echo $PPHOSTNAME > /etc/pphostname
-echo $PPEASYNAME > /etc/ppeasyname
+echo -n $PPHOSTNAME > /etc/pphostname
+echo -n $PPEASYNAME > /etc/ppeasyname
 
 if [ -z "$PPHOSTNAME" ] || [ -z "$PPEASYNAME" ]; then
 	print_help
